@@ -1,5 +1,6 @@
 # BYTE PLUS
-<img height="64" width="64" src=""/>
+<p align="center">
+<img height="150" width="150" src="public/logo.png"/></p>
 > **Connect once. Build everywhere.**
 
 DualBridge is an open-source communication framework that automatically bridges your backend with applications, AI agents, frontend frameworks, and services without writing repetitive integration code.
