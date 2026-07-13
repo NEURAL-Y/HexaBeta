@@ -1,6 +1,10 @@
 # BYTE PLUS
 <p align="center">
-<img height="150" width="150" src="public/logo.png"/></p>
+  <img src="https://github.com/NEURAL-Y/Byte-Plus/blob/main/public/logo.png?raw=true"
+       alt="Byte Plus Logo"
+       width="800"
+       height="800">
+</p>
 > **Connect once. Build everywhere.**
 
 DualBridge is an open-source communication framework that automatically bridges your backend with applications, AI agents, frontend frameworks, and services without writing repetitive integration code.
