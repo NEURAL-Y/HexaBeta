@@ -1,4 +1,4 @@
-# BYTE PLUS
+# HEXA BETA
 <p align="center">
   <img src="https://github.com/NEURAL-Y/Byte-Plus/blob/main/public/logo.png?raw=true"
        alt="Byte Plus Logo"
