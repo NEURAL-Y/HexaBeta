@@ -3,7 +3,7 @@
   <img src="https://github.com/NEURAL-Y/Byte-Plus/blob/main/public/logo.png?raw=true"
        alt="Byte Plus Logo"
        width="800"
-       height="800">
+       height="500">
 </p>
 > **Connect once. Build everywhere.**
 
