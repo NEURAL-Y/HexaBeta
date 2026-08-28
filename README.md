@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/NEURAL-Y/Byte-Plus/main/public/logo.png" alt="DualBridge" width="640" height="500"/>
+<img src="https://raw.githubusercontent.com/NEURAL-Y/Byte-Plus/main/public/logo.png" alt="DualBridge" width="220"/>
 
 # DualBridge
 
