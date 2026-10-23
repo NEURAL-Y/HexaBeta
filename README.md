@@ -20,11 +20,21 @@ DualBridge is an open-source communication framework that automatically bridges 
 
 Whether you're on **FastAPI**, **Express.js**, an **MCP Server**, or anything speaking HTTP/WebSockets, DualBridge gives you one secure, unified way to connect it all.
 
-## Why?
+<a id="why"></a>
+<details open>
+<summary><b>Why?</b></summary>
+
+<br>
 
 Every backend project eventually needs the same infrastructure: REST clients, WebSocket connections, auth, API key management, secure communication, rate limiting, multi-language SDKs, config management — hours of plumbing before you can build the actual feature. DualBridge eliminates that repetitive work.
 
-## Features
+</details>
+
+<a id="features"></a>
+<details>
+<summary><b>Features</b></summary>
+
+<br>
 
 | | |
 |---|---|
@@ -36,7 +46,13 @@ Every backend project eventually needs the same infrastructure: REST clients, We
 | 🚦 **Rate Limiting** | Requests/min, concurrent connections, WebSocket limits, custom policies |
 | 🧩 **Automatic SDK Generation** | Python and JavaScript client libraries generated for you, more languages planned |
 
-## Quick Start
+</details>
+
+<a id="quick-start"></a>
+<details>
+<summary><b>Quick Start</b></summary>
+
+<br>
 
 Define your project once:
 
@@ -66,7 +82,13 @@ dualbridge connect
 
 DualBridge automatically connects to your backend, generates SDKs, configures WebSockets, sets up authentication, manages API keys, and applies your security settings.
 
-## Architecture
+</details>
+
+<a id="architecture"></a>
+<details>
+<summary><b>Architecture</b></summary>
+
+<br>
 
 ```text
                     Backend
@@ -85,25 +107,68 @@ DualBridge automatically connects to your backend, generates SDKs, configures We
  Desktop Apps • Mobile Apps • CLI
 ```
 
-## Example Use Cases
+</details>
+
+<details>
+<summary><b>Example Use Cases</b></summary>
+
+<br>
 
 AI applications • MCP servers • internal APIs • SaaS platforms • React / Next.js apps • desktop & mobile apps • Python automation • CLI tools
 
-## Philosophy
+</details>
+
+<details>
+<summary><b>Philosophy</b></summary>
+
+<br>
 
 Infrastructure shouldn't be rewritten for every project. DualBridge lets developers focus on business logic instead of repeatedly implementing communication layers, auth systems, SDKs, and networking code.
 
 **Build your backend. Configure DualBridge. Connect everything.**
 
-## Roadmap
+</details>
 
-**v0.1** — FastAPI support · Express.js support · configuration parser · CLI · Python SDK generator · JavaScript SDK generator
+<a id="roadmap"></a>
+<details>
+<summary><b>Roadmap</b></summary>
 
-**v0.2** — WebSocket manager · API key manager · password authentication · encryption
+<br>
 
-**v0.3** — Rate limiting · plugin system · Docker support · MCP integration · additional framework support
+<details>
+<summary><b>v0.1</b></summary>
 
-## Contributing
+<br>
+
+FastAPI support · Express.js support · configuration parser · CLI · Python SDK generator · JavaScript SDK generator
+
+</details>
+
+<details>
+<summary><b>v0.2</b></summary>
+
+<br>
+
+WebSocket manager · API key manager · password authentication · encryption
+
+</details>
+
+<details>
+<summary><b>v0.3</b></summary>
+
+<br>
+
+Rate limiting · plugin system · Docker support · MCP integration · additional framework support
+
+</details>
+
+</details>
+
+<a id="contributing"></a>
+<details>
+<summary><b>Contributing</b></summary>
+
+<br>
 
 Contributions of every size are welcome — bug fixes, docs, new framework support, or feature proposals.
 
@@ -111,9 +176,16 @@ Contributions of every size are welcome — bug fixes, docs, new framework suppo
 2. Make focused commits; add tests where relevant.
 3. Open a PR describing the change and motivation.
 
-## License
+</details>
+
+<details>
+<summary><b>License</b></summary>
+
+<br>
 
 Released under the [MIT License](LICENSE).
+
+</details>
 
 ---
 
