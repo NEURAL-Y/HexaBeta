@@ -19,7 +19,7 @@
 DualBridge is an open-source communication framework that automatically bridges your backend with applications, AI agents, frontend frameworks, and services — without writing repetitive integration code. Instead of hand-rolling API wrappers, API key management, WebSocket setup, and auth middleware, DualBridge handles the communication layer for you.
 
 Whether you're on **FastAPI**, **Express.js**, an **MCP Server**, or anything speaking HTTP/WebSockets, DualBridge gives you one secure, unified way to connect it all.
-
+<img src="https://github.com/NEURAL-Y/HexaBeta/blob/main/public/countdown_feb.svg" width=100%/>
 <a id="why"></a>
 <details open>
 <summary><b>Why?</b></summary>
