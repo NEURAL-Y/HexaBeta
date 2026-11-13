@@ -4,29 +4,116 @@
 
 # DualBridge
 
-**Connect once. Build everywhere.**
+**Define once. Connect everywhere.**
+
+A unified TypeScript framework for backend connectivity: one definition, every protocol, one policy.
 
 ![Status](https://img.shields.io/badge/status-under%20development-yellow)
+![Language](https://img.shields.io/badge/TypeScript-first-3178c6)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 
-[Why](#why) • [Features](#features) • [Quick Start](#quick-start) • [Architecture](#architecture) • [Roadmap](#roadmap) • [Contributing](#contributing)
+[Why](#why) • [Core Idea](#core-idea) • [Quick Start](#quick-start) • [Features](#features) • [Architecture](#architecture) • [Roadmap](#roadmap) • [Contributing](#contributing)
 
 </div>
 
 ---
 
-DualBridge is an open-source communication framework that automatically bridges your backend with applications, AI agents, frontend frameworks, and services — without writing repetitive integration code. Instead of hand-rolling API wrappers, API key management, WebSocket setup, and auth middleware, DualBridge handles the communication layer for you.
+> **Status:** early design and development. The API below is the design target and may change. Nothing here is production-ready yet.
 
-Whether you're on **FastAPI**, **Express.js**, an **MCP Server**, or anything speaking HTTP/WebSockets, DualBridge gives you one secure, unified way to connect it all.
-<img src="https://github.com/NEURAL-Y/HexaBeta/blob/main/public/countdown_feb.svg" width=100%/>
+DualBridge is an open-source framework that fixes the connectivity layer of a backend. You write a capability once, and DualBridge exposes it over **HTTP, WebSocket and MCP** (gRPC and GraphQL later) with shared identity, shared policy, typed clients and reliable realtime built in, instead of stitching a separate library onto each protocol.
+
 <a id="why"></a>
 <details open>
 <summary><b>Why?</b></summary>
 
 <br>
 
-Every backend project eventually needs the same infrastructure: REST clients, WebSocket connections, auth, API key management, secure communication, rate limiting, multi-language SDKs, config management — hours of plumbing before you can build the actual feature. DualBridge eliminates that repetitive work.
+Backends rarely speak one protocol. The same logic ends up re-exposed as REST, WebSocket events, MCP tools and RPC, and each exposure brings its own library, its own auth, its own limits and its own error format. Over time they drift apart.
+
+Common pains DualBridge targets:
+
+- **Same logic, many entry points.** Re-implementing handlers per protocol.
+- **Contract drift.** Backend changes silently break frontends, SDKs and agents.
+- **Realtime plumbing.** Reconnect, resume, dedupe and backpressure rebuilt in every project.
+- **Policy drift.** Auth and rate limits differ between REST, WS and agent endpoints.
+- **Fragmented observability.** No single trace across protocols.
+
+DualBridge's answer: **one framework, one handler definition, one policy, every protocol.**
+
+</details>
+
+<a id="core-idea"></a>
+<details open>
+<summary><b>Core Idea</b></summary>
+
+<br>
+
+Every protocol is an **adapter** that normalizes traffic into one common context (`Ctx`). Everything after that is protocol-agnostic.
+
+```text
+HTTP ──┐
+WS   ──┤
+MCP  ──┼─► adapter ─► Ctx { client, proto, op, input, meta } ─► policy ─► handler
+gRPC ──┤
+GraphQL┘
+```
+
+What is unified:
+
+| Unified | Meaning |
+|---|---|
+| **Identity** | One `client` object whichever protocol it came from |
+| **Handlers** | Write the logic once, expose it on N protocols |
+| **Policy** | Guard, limits and rules defined once |
+| **Errors** | One error model mapped to HTTP status, WS frames, MCP codes |
+| **Observability** | One audit and trace format, with `proto` as a label |
+
+What is **not** reimplemented: wire protocols. Adapters wrap maintained libraries (`ws`, the MCP SDK, and so on). DualBridge owns the layer above them.
+
+</details>
+
+<a id="quick-start"></a>
+<details open>
+<summary><b>Quick Start</b></summary>
+
+<br>
+
+> Package not yet published. Usage shown is the planned API.
+
+```bash
+npm install dualbridge
+```
+
+```ts
+import { bridge } from "dualbridge";
+
+const app = bridge({
+  protocols: ["http", "ws", "mcp"],
+  cors: { origins: ["https://myapp.com"] },     // required, no open default
+  guard: { default: "deny", trustProxy: ["10.0.0.5"] },
+});
+
+app.define("getOrder", {
+  expose: {
+    http: "GET /orders/:id",
+    ws:   "order.get",
+    mcp:  "get_order",
+  },
+  policy: { scope: "orders:read" },
+  handler: async (ctx) => db.order(ctx.params.id),
+});
+
+app.start();
+```
+
+One definition gives you a REST route, a WebSocket event and an MCP tool, with the same guard, the same errors and one audit log.
+
+Generate a typed client from the same definitions:
+
+```bash
+npx dualbridge client --out ./sdk
+```
 
 </details>
 
@@ -38,49 +125,53 @@ Every backend project eventually needs the same infrastructure: REST clients, We
 
 | | |
 |---|---|
-| 🌐 **Multi-Framework** | FastAPI and Express.js today, more via plugins |
-| 🔄 **Built-in WebSockets** | Connection lifecycle, reconnection, event handling, message routing — handled automatically |
-| 🔑 **API Key Management** | Multiple keys, rotation, expiration, permission levels |
-| 🔒 **Optional Encryption** | Encrypt API keys, credentials, and config — or disable for local dev |
-| 🛡 **Password Protection** | An extra password layer before any client can connect |
-| 🚦 **Rate Limiting** | Requests/min, concurrent connections, WebSocket limits, custom policies |
-| 🧩 **Automatic SDK Generation** | Python and JavaScript client libraries generated for you, more languages planned |
+| 🌉 **Multi-protocol from one definition** | HTTP, WebSocket and MCP first; gRPC and GraphQL via the same adapter contract |
+| 🧾 **Typed clients** | Client SDKs generated from your definitions, so the contract is the source of truth |
+| 🔄 **Reliable realtime** | Reconnect, resume after drop, dedupe and backpressure handled for you |
+| 🔗 **Service-to-service client** | Timeouts, retries with idempotency, and trace propagation across hops |
+| 🛡 **Private-by-default shield** | Internal routes are not exposed unless marked `public`; upstream URLs and keys stay hidden behind a proxy layer |
+| 🚧 **IP guard + CORS** | Server-enforced IP and CIDR allowlist with default-deny, plus always-on CORS with explicit origins |
+| 🧬 **YARA-style rules** | Developer-written rules (`strings`, `condition`, `meta`) inspecting request and response content, with report mode and log replay |
+| ⚡ **Adaptive execution** | Cheap handlers run inline, heavy ones are offloaded to workers, overload is shed, chosen at runtime (the "semisynchronous" model) |
+| 🧩 **Adapter contract** | Add a protocol by implementing a small interface |
+| ⚙️ **Self-assigned middleware** | Secure defaults on out of the box, each individually switchable off in code |
 
 </details>
 
-<a id="quick-start"></a>
 <details>
-<summary><b>Quick Start</b></summary>
+<summary><b>Policy Layer</b></summary>
 
 <br>
 
-Define your project once:
+Policy is a plugin on top of the connectivity core and runs for every protocol in the same order:
 
-```yaml
-backend: fastapi
-endpoint: http://localhost:8000
-
-sdk:
-  - python
-  - javascript
-
-websocket: true
-
-security:
-  encryption: true
-  password: my-password
-
-rate_limit:
-  requests_per_minute: 500
+```text
+ipGuard → cors/preflight → rules → auth → handler
 ```
 
-Then run:
+Example rule:
 
-```bash
-dualbridge connect
+```text
+rule sqli_basic {
+  meta:      severity = "high", action = "block"
+  scope:     route "/api/*"
+  strings:
+    $a = /union\s+select/i
+    $b = "' or 1=1" nocase
+  fields:    query, body
+  condition: any of ($a, $b)
+}
 ```
 
-DualBridge automatically connects to your backend, generates SDKs, configures WebSockets, sets up authentication, manages API keys, and applies your security settings.
+Design notes:
+
+- Default-deny: no matching `allow` means blocked.
+- Modes: `block | report | tag`, global or per rule.
+- Inputs are normalized (URL decode, unicode, case) before matching.
+- Pattern matching uses a ReDoS-safe engine with a bounded inspection size.
+- Signature rules are defense in depth. Parameterized queries and real authentication remain the actual protection.
+- The IP guard honors `trustProxy` so spoofed `X-Forwarded-For` headers cannot bypass it.
+- Route and origin hiding reduces exposure but is not a substitute for auth. Browser DevTools can always see requests the browser makes.
 
 </details>
 
@@ -91,30 +182,46 @@ DualBridge automatically connects to your backend, generates SDKs, configures We
 <br>
 
 ```text
-                    Backend
-          (FastAPI / Express.js)
-                     │
-                     ▼
-              ┌───────────────┐
-              │  DualBridge   │
-              └───────────────┘
-          ┌────────┼─────────┐
-          ▼        ▼         ▼
-     Python SDK  JS SDK   WebSocket
-                     │
-                     ▼
- AI Agents • MCP Servers • Web Apps
- Desktop Apps • Mobile Apps • CLI
+                   app.define(...)
+                        │
+        ┌───────────────┴───────────────┐
+        │        @dualbridge/core       │
+        │  Ctx • pipeline • errors      │
+        │  policy • audit • typed gen   │
+        └───────────────┬───────────────┘
+      ┌─────────┬───────┴───┬───────────┬──────────┐
+      ▼         ▼           ▼           ▼          ▼
+   HTTP       WebSocket    MCP        gRPC      GraphQL
+  adapter     adapter     adapter    (later)    (later)
+      │         │           │
+      ▼         ▼           ▼
+  Web apps • Mobile • AI agents • CLIs • Other services
 ```
 
-</details>
+Packages:
 
-<details>
-<summary><b>Example Use Cases</b></summary>
+```text
+@dualbridge/core     Ctx, pipeline, errors, audit
+@dualbridge/http     HTTP adapter
+@dualbridge/ws       WebSocket adapter
+@dualbridge/mcp      MCP adapter
+@dualbridge/client   typed client generator
+dualbridge           meta-package: core + http + ws + mcp
+```
 
-<br>
+Adapter contract:
 
-AI applications • MCP servers • internal APIs • SaaS platforms • React / Next.js apps • desktop & mobile apps • Python automation • CLI tools
+```ts
+interface Adapter {
+  name: string;
+  start(pipeline: Pipeline): Promise<void>;
+  normalize(raw: unknown): Ctx;
+  reply(ctx: Ctx, res: Result): void;
+  stop(): Promise<void>;
+}
+```
+
+Adapters load lazily, so only the protocols you configure are imported.
 
 </details>
 
@@ -123,9 +230,9 @@ AI applications • MCP servers • internal APIs • SaaS platforms • React /
 
 <br>
 
-Infrastructure shouldn't be rewritten for every project. DualBridge lets developers focus on business logic instead of repeatedly implementing communication layers, auth systems, SDKs, and networking code.
+Connectivity should be one framework, not a pile of per-protocol libraries. Write your backend logic once, describe how it is exposed, and let the framework handle identity, policy, typing and reliability across every transport.
 
-**Build your backend. Configure DualBridge. Connect everything.**
+**Define once. Connect everywhere.**
 
 </details>
 
@@ -136,29 +243,47 @@ Infrastructure shouldn't be rewritten for every project. DualBridge lets develop
 <br>
 
 <details>
-<summary><b>v0.1</b></summary>
+<summary><b>v0.1 — Core</b></summary>
 
 <br>
 
-FastAPI support · Express.js support · configuration parser · CLI · Python SDK generator · JavaScript SDK generator
+`Ctx` and pipeline · error model · HTTP adapter · `app.define()` · config validation (fail at startup on unsafe config)
 
 </details>
 
 <details>
-<summary><b>v0.2</b></summary>
+<summary><b>v0.2 — Realtime and agents</b></summary>
 
 <br>
 
-WebSocket manager · API key manager · password authentication · encryption
+WebSocket adapter (reconnect, resume, dedupe, backpressure) · MCP adapter · shared policy proven across HTTP, WS and MCP · typed client generation
 
 </details>
 
 <details>
-<summary><b>v0.3</b></summary>
+<summary><b>v0.3 — Policy layer</b></summary>
 
 <br>
 
-Rate limiting · plugin system · Docker support · MCP integration · additional framework support
+IP guard with `trustProxy` · strict CORS · private-by-default shield · rule engine with report mode · `rules test --replay` · audit log
+
+</details>
+
+<details>
+<summary><b>v0.4 — Services</b></summary>
+
+<br>
+
+Service-to-service client (timeouts, retries, idempotency) · trace propagation across protocols · Docker support
+
+</details>
+
+<details>
+<summary><b>Later</b></summary>
+
+<br>
+
+gRPC and GraphQL adapters · adaptive execution scheduler · plugin system · Fastify/Hono integration
 
 </details>
 
@@ -170,11 +295,13 @@ Rate limiting · plugin system · Docker support · MCP integration · additiona
 
 <br>
 
-Contributions of every size are welcome — bug fixes, docs, new framework support, or feature proposals.
+Contributions of every size are welcome: bug fixes, docs, new protocol adapters, bypass tests, or feature proposals.
 
 1. Fork the repo and branch from `main`.
-2. Make focused commits; add tests where relevant.
-3. Open a PR describing the change and motivation.
+2. Make focused commits and add tests where relevant.
+3. Open a PR describing the change and the motivation.
+
+Security reports: please open a private advisory instead of a public issue.
 
 </details>
 
@@ -191,6 +318,6 @@ Released under the [MIT License](LICENSE).
 
 <div align="center">
 
-**Build your backend once. Connect it everywhere.**
+**Define once. Connect everywhere.**
 
 </div>
